@@ -130,12 +130,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-CORS_ALLOW_ALL_ORIGINS = True
+STATIC_URL = "static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+CORS_ALLOWED_ORIGINS = [
+    os.getenv("FRONTEND_URL"),
+]
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
 
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
