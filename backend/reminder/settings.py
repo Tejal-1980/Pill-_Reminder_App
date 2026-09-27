@@ -1,5 +1,4 @@
 import os
-from pathlib import
 import dj_database_url
 """
 Django settings for reminder project.

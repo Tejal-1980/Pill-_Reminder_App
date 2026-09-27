@@ -1,18 +1,65 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from .models import Medicine, MedicineSchedule, DoseRecord
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+class MedicineScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineSchedule
+        fields = "__all__"
+
+
+class DoseRecordSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.CharField(
+        source="schedule.medicine.name",
+        read_only=True
+    )
+
+    dosage = serializers.CharField(
+        source="schedule.medicine.dosage",
+        read_only=True
+    )
+
+    scheduled_time = serializers.TimeField(
+        source="schedule.time",
+        read_only=True
+    )
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
+        model = DoseRecord
+        fields = [
+            "id",
+            "schedule",
+            "medicine_name",
+            "dosage",
+            "scheduled_time",
+            "scheduled_at",
+            "status",
+            "confirmed_at",
+        ]
 
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
-        return user
+
+class MedicineSerializer(serializers.ModelSerializer):
+    schedules = MedicineScheduleSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Medicine
+        fields = [
+            "id",
+            "user",
+            "name",
+            "dosage",
+            "start_date",
+            "end_date",
+            "instructions",
+            "is_active",
+            "created_at",
+            "schedules",
+        ]
+
+        read_only_fields = [
+            "user",
+            "created_at",
+        ]
