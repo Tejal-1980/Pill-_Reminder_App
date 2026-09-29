@@ -18,7 +18,7 @@
 
 .header h1 {
   color: #1e293b;
-  margin-bottom: 5px;
+  margin: 0 0 5px;
 }
 
 .subtitle {
@@ -31,27 +31,30 @@
 }
 
 .history-btn,
-.logout-btn {
+.logout-btn,
+.add-section button,
+.delete-btn {
   border: none;
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
   cursor: pointer;
   font-weight: 600;
-  transition: 0.3s;
 }
 
 .history-btn {
   background: #2563eb;
 }
 
-.logout-btn {
+.logout-btn,
+.delete-btn {
   background: #ef4444;
 }
 
 .history-btn:hover,
-.logout-btn:hover {
-  transform: translateY(-2px);
+.logout-btn:hover,
+.delete-btn:hover {
+  opacity: 0.9;
 }
 
 .stats {
@@ -87,15 +90,16 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.add-section h2 {
+.add-section h2,
+.medicine-list h2 {
   margin-bottom: 20px;
   color: #1e293b;
 }
 
 .add-section form {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
-  gap: 15px;
+  grid-template-columns: 1.5fr 1fr 1fr 1.5fr auto;
+  gap: 12px;
 }
 
 .add-section input {
@@ -105,14 +109,18 @@
   font-size: 15px;
 }
 
+.add-section input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
 .add-section button {
   background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 14px;
-  cursor: pointer;
-  font-weight: 600;
+}
+
+.add-section button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .medicine-list {
@@ -122,58 +130,29 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.medicine-list h2 {
-  margin-bottom: 20px;
-  color: #1e293b;
-}
-
 .medicine-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
+  padding: 20px;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   margin-bottom: 15px;
-  transition: 0.3s;
-}
-
-.medicine-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
 .medicine-card h3 {
   color: #0f172a;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
 }
 
 .medicine-card p {
   color: #64748b;
-  margin: 4px 0;
+  margin: 5px 0;
 }
 
 .medicine-actions {
   display: flex;
   gap: 10px;
-}
-
-.taken-btn {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.delete-btn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  cursor: pointer;
 }
 
 .status {
@@ -206,13 +185,21 @@
   color: #334155;
 }
 
+@media (max-width: 1100px) {
+  .add-section form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .add-section form {
-    grid-template-columns: 1fr;
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
   }
 
   .medicine-card {
@@ -220,9 +207,27 @@
     align-items: flex-start;
     gap: 15px;
   }
+}
 
-  .header {
-    flex-direction: column;
-    gap: 15px;
+@media (max-width: 600px) {
+  .dashboard {
+    padding: 15px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .add-section form {
+    grid-template-columns: 1fr;
+  }
+
+  .header-buttons {
+    width: 100%;
+  }
+
+  .history-btn,
+  .logout-btn {
+    flex: 1;
   }
 }
