@@ -2,6 +2,7 @@
   min-height: 100vh;
   background: #f4f7fc;
   padding: 30px;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .history-header {
@@ -9,9 +10,22 @@
   padding: 25px;
   border-radius: 18px;
   margin-bottom: 25px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.history-header h1 {
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+.history-header p {
+  color: #64748b;
 }
 
 .history-stats {
@@ -26,47 +40,135 @@
   padding: 20px;
   border-radius: 15px;
   text-align: center;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.history-card h2 {
+  color: #2563eb;
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+.history-card p {
+  color: #64748b;
 }
 
 .search-section input {
   width: 100%;
   padding: 14px;
+
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #dbe2ea;
+
+  font-size: 15px;
+}
+
+.search-section input:focus {
+  outline: none;
+  border-color: #2563eb;
 }
 
 .history-list {
   margin-top: 25px;
+
+  background: white;
+  padding: 25px;
+  border-radius: 18px;
+}
+
+.history-list h2 {
+  color: #1e293b;
+  margin-bottom: 20px;
 }
 
 .history-item {
-  background: white;
+  background: #f8fafc;
   padding: 20px;
+
   border-radius: 15px;
   margin-bottom: 15px;
+
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.history-item h3 {
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.history-item p {
+  color: #64748b;
+  margin: 5px 0;
+}
+
+.taken-badge,
+.pending-badge,
+.missed-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .taken-badge {
   background: #dcfce7;
-  color: green;
-  padding: 8px 12px;
-  border-radius: 20px;
+  color: #166534;
 }
 
 .pending-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.missed-badge {
   background: #fee2e2;
-  color: red;
-  padding: 8px 12px;
-  border-radius: 20px;
+  color: #b91c1c;
 }
 
 .back-btn {
   background: #2563eb;
   color: white;
+
   border: none;
+
   padding: 12px 20px;
+
   border-radius: 10px;
+
   cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .history-page {
+    padding: 15px;
+  }
+
+  .history-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 500px) {
+  .history-stats {
+    grid-template-columns: 1fr;
+  }
 }
