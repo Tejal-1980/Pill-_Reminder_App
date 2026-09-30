@@ -1,47 +1,36 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import {
   useNavigate,
   Navigate,
 } from "react-router-dom";
-
 import axios from "axios";
 
 import "./history.css";
 
-
 const API = "http://127.0.0.1:8000/api";
-
 
 function History() {
   const token = localStorage.getItem("access");
-
   const navigate = useNavigate();
 
   const [doses, setDoses] = useState([]);
   const [search, setSearch] = useState("");
 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-
   useEffect(() => {
     const loadDoses = async () => {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
       try {
-        const response =
-          await axios.get(
-            `${API}/doses/`,
-            config
-          );
+        const response = await axios.get(
+          `${API}/doses/`,
+          config
+        );
 
         setDoses(response.data);
-
       } catch (error) {
         console.log(error);
       }
@@ -50,48 +39,32 @@ function History() {
     if (token) {
       loadDoses();
     }
-  }, []);
-
+  }, [token]);
 
   if (!token) {
     return <Navigate to="/" />;
   }
 
-
-  const filteredDoses =
-    doses.filter((dose) =>
-      dose.medicine_name
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
-    );
-
+  const filteredDoses = doses.filter((dose) =>
+    dose.medicine_name
+      ?.toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   const total = doses.length;
 
   const taken = doses.filter(
-    (dose) =>
-      dose.status === "taken"
-  ).length;
-
-  const missed = doses.filter(
-    (dose) =>
-      dose.status === "missed"
+    (dose) => dose.status === "taken"
   ).length;
 
   const pending = doses.filter(
-    (dose) =>
-      dose.status === "pending"
+    (dose) => dose.status === "pending"
   ).length;
 
   const adherence =
     total > 0
-      ? Math.round(
-        (taken / total) * 100
-      )
+      ? Math.round((taken / total) * 100)
       : 0;
-
 
   return (
     <div className="history-page">
@@ -99,9 +72,7 @@ function History() {
       <div className="history-header">
 
         <div>
-          <h1>
-            📊 Medication History
-          </h1>
+          <h1>📊 Medication History</h1>
 
           <p>
             Track your medication doses
@@ -109,18 +80,14 @@ function History() {
           </p>
         </div>
 
-
         <button
           className="back-btn"
-          onClick={() =>
-            navigate("/dashboard")
-          }
+          onClick={() => navigate("/dashboard")}
         >
           ← Dashboard
         </button>
 
       </div>
-
 
       <div className="history-stats">
 
@@ -146,102 +113,81 @@ function History() {
 
       </div>
 
-
       <div className="search-section">
 
         <input
           type="text"
           placeholder="🔍 Search medicine..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={(e) => setSearch(e.target.value)}
         />
 
       </div>
 
-
       <div className="history-list">
 
-        <h2>
-          Dose Records
-        </h2>
-
+        <h2>Dose Records</h2>
 
         {filteredDoses.length === 0 ? (
 
           <div className="no-data">
-            <h3>
-              No Dose Records Found
-            </h3>
+            <h3>No Dose Records Found</h3>
           </div>
 
         ) : (
 
-          filteredDoses.map(
-            (dose) => (
+          filteredDoses.map((dose) => (
 
-              <div
-                className="history-item"
-                key={dose.id}
-              >
+            <div
+              className="history-item"
+              key={dose.id}
+            >
 
-                <div>
+              <div>
 
-                  <h3>
-                    {dose.medicine_name}
-                  </h3>
+                <h3>{dose.medicine_name}</h3>
 
-                  <p>
-                    <strong>
-                      Dosage:
-                    </strong>{" "}
-                    {dose.dosage}
-                  </p>
+                <p>
+                  <strong>Dosage:</strong>{" "}
+                  {dose.dosage}
+                </p>
 
-                  <p>
-                    <strong>
-                      Scheduled:
-                    </strong>{" "}
-                    {new Date(
-                      dose.scheduled_at
-                    ).toLocaleString()}
-                  </p>
-
-                </div>
-
-
-                <div>
-
-                  {dose.status ===
-                    "taken" ? (
-
-                    <span className="taken-badge">
-                      ✓ Taken
-                    </span>
-
-                  ) : dose.status ===
-                    "missed" ? (
-
-                    <span className="missed-badge">
-                      ✕ Missed
-                    </span>
-
-                  ) : (
-
-                    <span className="pending-badge">
-                      ⏳{" "}
-                      {dose.status}
-                    </span>
-
-                  )}
-
-                </div>
+                <p>
+                  <strong>Scheduled:</strong>{" "}
+                  {new Date(
+                    dose.scheduled_at
+                  ).toLocaleString()}
+                </p>
 
               </div>
 
-            )
-          )
+              <div>
+
+                {dose.status === "taken" ? (
+
+                  <span className="taken-badge">
+                    ✓ Taken
+                  </span>
+
+                ) : dose.status === "missed" ? (
+
+                  <span className="missed-badge">
+                    ✕ Missed
+                  </span>
+
+                ) : (
+
+                  <span className="pending-badge">
+                    ⏳ {dose.status}
+                  </span>
+
+                )}
+
+              </div>
+
+            </div>
+
+          ))
 
         )}
 
@@ -250,6 +196,5 @@ function History() {
     </div>
   );
 }
-
 
 export default History;
