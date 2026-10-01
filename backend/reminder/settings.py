@@ -104,11 +104,14 @@ WSGI_APPLICATION = "reminder.wsgi.application"
 
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv(
-            "DATABASE_URL"
-        )
-    )
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "pillreminder",
+        "USER": "postgres",
+        "PASSWORD": "tejalpsql123",
+        "HOST": "localhost",
+        "PORT": "5432",
+    }
 }
 
 

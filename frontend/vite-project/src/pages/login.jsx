@@ -1,4 +1,3 @@
-```jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -29,12 +28,25 @@ function Login() {
         }
       );
 
-      localStorage.setItem("access", response.data.access);
-      localStorage.setItem("refresh", response.data.refresh);
+      localStorage.setItem(
+        "access",
+        response.data.access
+      );
+
+      localStorage.setItem(
+        "refresh",
+        response.data.refresh
+      );
 
       navigate("/dashboard");
-    } catch {
-      setError("Invalid username or password.");
+
+    } catch (error) {
+      console.log(error);
+
+      setError(
+        "Invalid username or password."
+      );
+
     } finally {
       setLoading(false);
     }
@@ -45,31 +57,40 @@ function Login() {
 
       <div className="auth-left">
         <div>
-          <h1>💊 Pill Reminder</h1>
+
+          <h1>
+            💊 Pill Reminder
+          </h1>
 
           <p>
             Stay on schedule.
             <br />
             Stay healthy.
           </p>
+
         </div>
       </div>
+
 
       <div className="auth-right">
 
         <div className="auth-card">
 
-          <h2>Welcome Back</h2>
+          <h2>
+            Welcome Back
+          </h2>
 
           <p className="auth-subtitle">
             Login to manage your medicines.
           </p>
+
 
           {error && (
             <div className="auth-error">
               {error}
             </div>
           )}
+
 
           <form onSubmit={handleLogin}>
 
@@ -82,9 +103,12 @@ function Login() {
               placeholder="Enter username"
               className="auth-input"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) =>
+                setUsername(e.target.value)
+              }
               required
             />
+
 
             <label>
               Password
@@ -93,4 +117,42 @@ function Login() {
             <input
               type="password"
               placeholder="Enter password"
-```
+              className="auth-input"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              required
+            />
+
+
+            <button
+              type="submit"
+              className="auth-btn"
+              disabled={loading}
+            >
+              {loading
+                ? "Logging in..."
+                : "Login"}
+            </button>
+
+          </form>
+
+
+          <p className="auth-text">
+            Don't have an account?{" "}
+
+            <Link to="/register">
+              Register
+            </Link>
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default Login;
