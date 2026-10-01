@@ -1,14 +1,36 @@
 from rest_framework import serializers
-from .models import Medicine, MedicineSchedule, DoseRecord
+
+from .models import (
+    Medicine,
+    MedicineSchedule,
+    DoseRecord,
+)
 
 
-class MedicineScheduleSerializer(serializers.ModelSerializer):
+class MedicineScheduleSerializer(
+    serializers.ModelSerializer
+):
+
     class Meta:
         model = MedicineSchedule
-        fields = "__all__"
+
+        fields = [
+            "id",
+            "medicine",
+            "time",
+            "frequency",
+            "is_active",
+        ]
+
+        read_only_fields = [
+            "id",
+        ]
 
 
-class DoseRecordSerializer(serializers.ModelSerializer):
+class DoseRecordSerializer(
+    serializers.ModelSerializer
+):
+
     medicine_name = serializers.CharField(
         source="schedule.medicine.name",
         read_only=True
@@ -26,6 +48,7 @@ class DoseRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DoseRecord
+
         fields = [
             "id",
             "schedule",
@@ -37,8 +60,17 @@ class DoseRecordSerializer(serializers.ModelSerializer):
             "confirmed_at",
         ]
 
+        read_only_fields = [
+            "id",
+            "status",
+            "confirmed_at",
+        ]
 
-class MedicineSerializer(serializers.ModelSerializer):
+
+class MedicineSerializer(
+    serializers.ModelSerializer
+):
+
     schedules = MedicineScheduleSerializer(
         many=True,
         read_only=True
@@ -61,6 +93,7 @@ class MedicineSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
+            "id",
             "user",
             "created_at",
         ]
