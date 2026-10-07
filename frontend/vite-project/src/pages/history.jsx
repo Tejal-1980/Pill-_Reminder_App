@@ -1,200 +1,411 @@
-import { useEffect, useState } from "react";
 import {
-  useNavigate,
-  Navigate,
-} from "react-router-dom";
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
+
+import { useNavigate } from "react-router-dom";
 
 import "./history.css";
 
-const API = "http://127.0.0.1:8000/api";
+
+const API =
+  "http://127.0.0.1:8000/api";
+
 
 function History() {
-  const token = localStorage.getItem("access");
+
   const navigate = useNavigate();
 
-  const [doses, setDoses] = useState([]);
-  const [search, setSearch] = useState("");
+  const token =
+    localStorage.getItem(
+      "access"
+    );
+
+
+  const [doses, setDoses] =
+    useState([]);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+
+  const config = {
+    headers: {
+      Authorization:
+        `Bearer ${token}`,
+    },
+  };
+
 
   useEffect(() => {
-    const loadDoses = async () => {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
 
-      try {
-        const response = await axios.get(
+    if (!token) {
+
+      navigate("/");
+
+      return;
+    }
+
+    fetchDoses();
+
+  }, []);
+
+
+  const fetchDoses = async () => {
+
+    try {
+
+      setLoading(true);
+
+      const response =
+        await axios.get(
           `${API}/doses/`,
           config
         );
 
-        setDoses(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+      setDoses(
+        response.data
+      );
 
-    if (token) {
-      loadDoses();
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+
     }
-  }, [token]);
 
-  if (!token) {
-    return <Navigate to="/" />;
-  }
+  };
 
-  const filteredDoses = doses.filter((dose) =>
-    dose.medicine_name
-      ?.toLowerCase()
-      .includes(search.toLowerCase())
-  );
 
-  const total = doses.length;
+  const takeDose = async (
+    id
+  ) => {
 
-  const taken = doses.filter(
-    (dose) => dose.status === "taken"
-  ).length;
+    try {
 
-  const pending = doses.filter(
-    (dose) => dose.status === "pending"
-  ).length;
+      await axios.post(
+        `${API}/doses/${id}/take/`,
+        {},
+        config
+      );
+
+      await fetchDoses();
+
+    } catch (error) {
+
+      alert(
+        "Unable to mark dose as taken."
+      );
+
+    }
+
+  };
+
+
+  const skipDose = async (
+    id
+  ) => {
+
+    try {
+
+      await axios.post(
+        `${API}/doses/${id}/skip/`,
+        {},
+        config
+      );
+
+      await fetchDoses();
+
+    } catch (error) {
+
+      alert(
+        "Unable to skip dose."
+      );
+
+    }
+
+  };
+
+
+  const filteredDoses =
+    doses.filter(
+      (dose) =>
+        dose.medicine_name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
+    );
+
+
+  const total =
+    doses.length;
+
+  const taken =
+    doses.filter(
+      (dose) =>
+        dose.status === "taken"
+    ).length;
+
+  const missed =
+    doses.filter(
+      (dose) =>
+        dose.status === "missed"
+    ).length;
+
+  const pending =
+    doses.filter(
+      (dose) =>
+        dose.status === "pending"
+    ).length;
+
 
   const adherence =
     total > 0
-      ? Math.round((taken / total) * 100)
+      ? Math.round(
+        (taken / total) * 100
+      )
       : 0;
 
+
   return (
+
     <div className="history-page">
 
-      <div className="history-header">
+      <header className="history-header">
 
         <div>
-          <h1>📊 Medication History</h1>
+
+          <h1>
+            Medicine History
+          </h1>
 
           <p>
-            Track your medication doses
-            and adherence.
+            Track your medication activity
           </p>
+
         </div>
+
 
         <button
-          className="back-btn"
-          onClick={() => navigate("/dashboard")}
+          onClick={() =>
+            navigate("/dashboard")
+          }
         >
-          ← Dashboard
+          Dashboard
         </button>
 
-      </div>
+      </header>
 
-      <div className="history-stats">
 
-        <div className="history-card">
-          <h2>{total}</h2>
-          <p>Total Doses</p>
+      <main className="history-content">
+
+
+        <div className="history-stats">
+
+          <div>
+
+            <span>
+              Total
+            </span>
+
+            <strong>
+              {total}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Taken
+            </span>
+
+            <strong>
+              {taken}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Missed
+            </span>
+
+            <strong>
+              {missed}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Pending
+            </span>
+
+            <strong>
+              {pending}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Adherence
+            </span>
+
+            <strong>
+              {adherence}%
+            </strong>
+
+          </div>
+
         </div>
 
-        <div className="history-card">
-          <h2>{taken}</h2>
-          <p>Taken</p>
-        </div>
-
-        <div className="history-card">
-          <h2>{pending}</h2>
-          <p>Pending</p>
-        </div>
-
-        <div className="history-card">
-          <h2>{adherence}%</h2>
-          <p>Adherence</p>
-        </div>
-
-      </div>
-
-      <div className="search-section">
 
         <input
+          className="history-search"
           type="text"
-          placeholder="🔍 Search medicine..."
+          placeholder="Search medicine..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
         />
 
-      </div>
 
-      <div className="history-list">
+        {loading ? (
 
-        <h2>Dose Records</h2>
-
-        {filteredDoses.length === 0 ? (
-
-          <div className="no-data">
-            <h3>No Dose Records Found</h3>
-          </div>
+          <p>
+            Loading medicine history...
+          </p>
 
         ) : (
 
-          filteredDoses.map((dose) => (
+          <div className="dose-list">
 
-            <div
-              className="history-item"
-              key={dose.id}
-            >
+            {filteredDoses.length === 0 ? (
 
-              <div>
+              <div className="empty-history">
 
-                <h3>{dose.medicine_name}</h3>
-
-                <p>
-                  <strong>Dosage:</strong>{" "}
-                  {dose.dosage}
-                </p>
+                <h3>
+                  No dose records
+                </h3>
 
                 <p>
-                  <strong>Scheduled:</strong>{" "}
-                  {new Date(
-                    dose.scheduled_at
-                  ).toLocaleString()}
+                  Today's doses will
+                  appear here automatically.
                 </p>
 
               </div>
 
-              <div>
+            ) : (
 
-                {dose.status === "taken" ? (
+              filteredDoses.map(
+                (dose) => (
 
-                  <span className="taken-badge">
-                    ✓ Taken
-                  </span>
+                  <div
+                    className="dose-item"
+                    key={dose.id}
+                  >
 
-                ) : dose.status === "missed" ? (
+                    <div>
 
-                  <span className="missed-badge">
-                    ✕ Missed
-                  </span>
+                      <h3>
+                        {dose.medicine_name}
+                      </h3>
 
-                ) : (
+                      <p>
+                        Dosage:{" "}
+                        {dose.dosage}
+                      </p>
 
-                  <span className="pending-badge">
-                    ⏳ {dose.status}
-                  </span>
+                      <p>
+                        Scheduled:{" "}
+                        {new Date(
+                          dose.scheduled_at
+                        ).toLocaleString()}
+                      </p>
 
-                )}
+                    </div>
 
-              </div>
 
-            </div>
+                    <div className="dose-actions">
 
-          ))
+                      <span
+                        className={
+                          `status-badge ${dose.status}`
+                        }
+                      >
+                        {dose.status}
+                      </span>
+
+
+                      {dose.status ===
+                        "pending" && (
+
+                          <>
+
+                            <button
+                              onClick={() =>
+                                takeDose(
+                                  dose.id
+                                )
+                              }
+                            >
+                              Take
+                            </button>
+
+
+                            <button
+                              onClick={() =>
+                                skipDose(
+                                  dose.id
+                                )
+                              }
+                            >
+                              Skip
+                            </button>
+
+                          </>
+
+                        )}
+
+                    </div>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
+          </div>
 
         )}
 
-      </div>
+      </main>
 
     </div>
   );
 }
+
 
 export default History;
