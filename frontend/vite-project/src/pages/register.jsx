@@ -1,179 +1,179 @@
 import { useState } from "react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import "./Auth.css";
 
 
+const API =
+  "http://127.0.0.1:8000/api";
+
+
 function Register() {
+
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] =
+    useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [role, setRole] =
+    useState("patient");
+
+  const [error, setError] =
+    useState("");
 
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const handleRegister = async (event) => {
+
+    event.preventDefault();
 
     setError("");
-    setLoading(true);
+
 
     try {
+
       await axios.post(
-        "http://127.0.0.1:8000/api/accounts/register/",
+        `${API}/accounts/register/`,
         {
           username,
           email,
           password,
+          role,
         }
+      );
+
+
+      alert(
+        "Registration successful."
       );
 
       navigate("/");
 
     } catch (error) {
-      const data = error.response?.data;
 
-      if (data?.username) {
-        setError(
-          data.username[0]
-        );
-      } else if (data?.email) {
-        setError(
-          data.email[0]
-        );
-      } else if (data?.password) {
-        setError(
-          data.password[0]
-        );
-      } else {
-        setError(
-          "Registration failed."
-        );
-      }
+      const data =
+        error.response?.data;
 
-    } finally {
-      setLoading(false);
+      setError(
+        data?.username?.[0] ||
+        data?.email?.[0] ||
+        data?.password?.[0] ||
+        data?.error ||
+        "Registration failed."
+      );
+
     }
+
   };
 
 
   return (
-    <div className="auth-container">
 
-      <div className="auth-left">
-        <div>
-          <h1>💊 Pill Reminder</h1>
+    <div className="auth-page">
 
-          <p>
-            Your medication,
-            <br />
-            organized.
-          </p>
-        </div>
-      </div>
+      <div className="auth-card">
+
+        <h1>
+          Create Account
+        </h1>
+
+        <p>
+          Start managing your medicines.
+        </p>
 
 
-      <div className="auth-right">
+        <form onSubmit={handleRegister}>
 
-        <div className="auth-card">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) =>
+              setUsername(e.target.value)
+            }
+            required
+          />
 
-          <h2>Create Account</h2>
 
-          <p className="auth-subtitle">
-            Start managing your medicines.
-          </p>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            required
+          />
+
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            required
+          />
+
+
+          <select
+            value={role}
+            onChange={(e) =>
+              setRole(e.target.value)
+            }
+          >
+
+            <option value="patient">
+              Patient
+            </option>
+
+            <option value="caregiver">
+              Caregiver
+            </option>
+
+          </select>
 
 
           {error && (
-            <div className="auth-error">
+            <p className="error">
               {error}
-            </div>
+            </p>
           )}
 
 
-          <form onSubmit={handleRegister}>
+          <button type="submit">
+            Register
+          </button>
 
-            <label>
-              Username
-            </label>
-
-            <input
-              type="text"
-              placeholder="Choose username"
-              className="auth-input"
-              value={username}
-              onChange={(e) =>
-                setUsername(e.target.value)
-              }
-              required
-            />
+        </form>
 
 
-            <label>
-              Email
-            </label>
+        <p>
 
-            <input
-              type="email"
-              placeholder="Enter email"
-              className="auth-input"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-            />
+          Already have an account?{" "}
 
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/")
+            }
+          >
+            Login
+          </button>
 
-            <label>
-              Password
-            </label>
-
-            <input
-              type="password"
-              placeholder="Minimum 8 characters"
-              className="auth-input"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              minLength={8}
-              required
-            />
-
-
-            <button
-              type="submit"
-              className="auth-btn"
-              disabled={loading}
-            >
-              {loading
-                ? "Creating..."
-                : "Create Account"}
-            </button>
-
-          </form>
-
-
-          <p className="auth-text">
-            Already have an account?{" "}
-            <Link to="/">
-              Login
-            </Link>
-          </p>
-
-        </div>
+        </p>
 
       </div>
 
     </div>
+
   );
 }
 
