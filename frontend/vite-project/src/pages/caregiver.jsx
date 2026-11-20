@@ -1,18 +1,29 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 
 
-const API = "http://127.0.0.1:8000/api";
+const API =
+  "http://127.0.0.1:8000/api";
 
 
 function Caregiver() {
 
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("access");
+  const token =
+    localStorage.getItem(
+      "access"
+    );
 
-  const [username, setUsername] = useState("");
+
+  const [username, setUsername] =
+    useState("");
 
   const [connections, setConnections] =
     useState([]);
@@ -23,10 +34,17 @@ function Caregiver() {
   const [notifications, setNotifications] =
     useState([]);
 
+  const [selectedPatient, setSelectedPatient] =
+    useState(null);
+
+  const [patientDoses, setPatientDoses] =
+    useState([]);
+
 
   const config = {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization:
+        `Bearer ${token}`,
     },
   };
 
@@ -34,7 +52,9 @@ function Caregiver() {
   useEffect(() => {
 
     if (!token) {
+
       navigate("/");
+
       return;
     }
 
@@ -92,125 +112,156 @@ function Caregiver() {
   };
 
 
-  const requestCaregiver = async () => {
+  const sendRequest =
+    async () => {
 
-    if (!username.trim()) {
+      if (!username.trim()) {
 
-      alert(
-        "Enter the caregiver username."
-      );
+        alert(
+          "Enter caregiver username."
+        );
 
-      return;
-    }
-
-
-    try {
-
-      await axios.post(
-        `${API}/accounts/caregiver/request_connection/`,
-        {
-          caregiver_username: username,
-        },
-        config
-      );
-
-      alert(
-        "Caregiver request sent."
-      );
-
-      setUsername("");
-
-      loadData();
-
-    } catch (error) {
-
-      alert(
-        error.response?.data?.error ||
-        "Unable to send request."
-      );
-
-    }
-
-  };
+        return;
+      }
 
 
-  const acceptConnection = async (id) => {
+      try {
 
-    try {
-
-      await axios.post(
-        `${API}/accounts/caregiver/${id}/accept/`,
-        {},
-        config
-      );
-
-      loadData();
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
-
-  };
+        await axios.post(
+          `${API}/accounts/caregiver/request_connection/`,
+          {
+            caregiver_username:
+              username.trim(),
+          },
+          config
+        );
 
 
-  const rejectConnection = async (id) => {
+        alert(
+          "Caregiver request sent."
+        );
 
-    try {
+        setUsername("");
 
-      await axios.post(
-        `${API}/accounts/caregiver/${id}/reject/`,
-        {},
-        config
-      );
+        loadData();
 
-      loadData();
+      } catch (error) {
 
-    } catch (error) {
+        alert(
+          error.response?.data?.error ||
+          "Unable to send request."
+        );
 
-      console.error(error);
+      }
 
-    }
-
-  };
+    };
 
 
-  const markRead = async (id) => {
+  const acceptRequest =
+    async (id) => {
 
-    try {
+      try {
 
-      await axios.post(
-        `${API}/accounts/notifications/${id}/mark_read/`,
-        {},
-        config
-      );
+        await axios.post(
+          `${API}/accounts/caregiver/${id}/accept/`,
+          {},
+          config
+        );
 
-      loadData();
+        loadData();
 
-    } catch (error) {
+      } catch (error) {
 
-      console.error(error);
+        console.error(error);
 
-    }
+      }
 
-  };
+    };
+
+
+  const rejectRequest =
+    async (id) => {
+
+      try {
+
+        await axios.post(
+          `${API}/accounts/caregiver/${id}/reject/`,
+          {},
+          config
+        );
+
+        loadData();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    };
+
+
+  const viewPatient =
+    async (patient) => {
+
+      try {
+
+        const response =
+          await axios.get(
+            `${API}/accounts/caregiver/patient_doses/?patient_id=${patient.id}`,
+            config
+          );
+
+        setSelectedPatient(
+          patient
+        );
+
+        setPatientDoses(
+          response.data
+        );
+
+      } catch (error) {
+
+        alert(
+          "Unable to load patient doses."
+        );
+
+      }
+
+    };
+
+
+  const markRead =
+    async (id) => {
+
+      try {
+
+        await axios.post(
+          `${API}/accounts/notifications/${id}/mark_read/`,
+          {},
+          config
+        );
+
+        loadData();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    };
 
 
   return (
 
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: "30px",
-      }}
-    >
+    <div className="caregiver-page">
 
-      <div
+      <main
         style={{
           maxWidth: "1100px",
           margin: "auto",
+          padding: "30px",
         }}
       >
 
@@ -229,47 +280,39 @@ function Caregiver() {
 
 
         <p>
-          Connect with a caregiver and monitor
-          medication activity.
+          Manage caregiver connections
+          and medication activity.
         </p>
 
 
-        <section
-          style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            marginTop: "25px",
-          }}
-        >
+        <section className="caregiver-card">
 
           <h2>
-            Connect Caregiver
+            Connect a Caregiver
           </h2>
 
           <p>
-            Enter the caregiver's registered username.
+            Enter the caregiver's
+            registered username.
           </p>
 
 
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="caregiver-form">
 
             <input
               value={username}
               onChange={(e) =>
-                setUsername(e.target.value)
+                setUsername(
+                  e.target.value
+                )
               }
               placeholder="Caregiver username"
             />
 
             <button
-              onClick={requestCaregiver}
+              onClick={
+                sendRequest
+              }
             >
               Send Request
             </button>
@@ -279,14 +322,7 @@ function Caregiver() {
         </section>
 
 
-        <section
-          style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            marginTop: "25px",
-          }}
-        >
+        <section className="caregiver-card">
 
           <h2>
             Connections
@@ -296,83 +332,84 @@ function Caregiver() {
           {connections.length === 0 ? (
 
             <p>
-              No caregiver connections yet.
+              No connections yet.
             </p>
 
           ) : (
 
-            connections.map((connection) => (
+            connections.map(
+              (connection) => (
 
-              <div
-                key={connection.id}
-                style={{
-                  padding: "15px",
-                  borderBottom:
-                    "1px solid #eee",
-                }}
-              >
-
-                <strong>
-                  Patient:{" "}
-                  {connection.patient_username}
-                </strong>
-
-                <p>
-                  Caregiver:{" "}
-                  {connection.caregiver_username}
-                </p>
-
-                <p>
-                  Status:{" "}
-                  {connection.status}
-                </p>
-
-
-                {connection.status === "pending" && (
+                <div
+                  className="connection-row"
+                  key={connection.id}
+                >
 
                   <div>
 
-                    <button
-                      onClick={() =>
-                        acceptConnection(
-                          connection.id
-                        )
+                    <strong>
+                      Patient:{" "}
+                      {
+                        connection.patient_username
                       }
-                    >
-                      Accept
-                    </button>
+                    </strong>
 
-                    <button
-                      onClick={() =>
-                        rejectConnection(
-                          connection.id
-                        )
+                    <p>
+                      Caregiver:{" "}
+                      {
+                        connection.caregiver_username
                       }
-                    >
-                      Reject
-                    </button>
+                    </p>
+
+                    <span>
+                      Status:{" "}
+                      {connection.status}
+                    </span>
 
                   </div>
 
-                )}
 
-              </div>
+                  {connection.status ===
+                    "pending" && (
 
-            ))
+                      <div>
+
+                        <button
+                          onClick={() =>
+                            acceptRequest(
+                              connection.id
+                            )
+                          }
+                        >
+                          Accept
+                        </button>
+
+
+                        <button
+                          onClick={() =>
+                            rejectRequest(
+                              connection.id
+                            )
+                          }
+                        >
+                          Reject
+                        </button>
+
+                      </div>
+
+                    )}
+
+                </div>
+
+              )
+            )
 
           )}
 
         </section>
 
 
-        <section
-          style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            marginTop: "25px",
-          }}
-        >
+        <section className="caregiver-card">
 
           <h2>
             Connected Patients
@@ -387,42 +424,113 @@ function Caregiver() {
 
           ) : (
 
-            patients.map((patient) => (
+            patients.map(
+              (patient) => (
 
-              <div
-                key={patient.id}
-                style={{
-                  padding: "15px",
-                  borderBottom:
-                    "1px solid #eee",
-                }}
-              >
+                <div
+                  className="patient-row"
+                  key={patient.id}
+                >
 
-                <strong>
-                  {patient.username}
-                </strong>
+                  <div>
 
-                <p>
-                  {patient.email}
-                </p>
+                    <strong>
+                      {patient.username}
+                    </strong>
 
-              </div>
+                    <p>
+                      {patient.email}
+                    </p>
 
-            ))
+                  </div>
+
+
+                  <button
+                    onClick={() =>
+                      viewPatient(
+                        patient
+                      )
+                    }
+                  >
+                    View Medication
+                  </button>
+
+                </div>
+
+              )
+            )
 
           )}
 
         </section>
 
 
-        <section
-          style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            marginTop: "25px",
-          }}
-        >
+        {selectedPatient && (
+
+          <section className="caregiver-card">
+
+            <h2>
+              {selectedPatient.username}'s
+              Medication History
+            </h2>
+
+
+            {patientDoses.length === 0 ? (
+
+              <p>
+                No dose records available.
+              </p>
+
+            ) : (
+
+              patientDoses.map(
+                (dose) => (
+
+                  <div
+                    className="dose-row"
+                    key={dose.id}
+                  >
+
+                    <div>
+
+                      <strong>
+                        {dose.medicine_name}
+                      </strong>
+
+                      <p>
+                        {dose.dosage}
+                      </p>
+
+                      <small>
+                        {new Date(
+                          dose.scheduled_at
+                        ).toLocaleString()}
+                      </small>
+
+                    </div>
+
+
+                    <span
+                      className={
+                        `status-badge ${dose.status}`
+                      }
+                    >
+                      {dose.status}
+                    </span>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
+          </section>
+
+        )}
+
+
+        <section className="caregiver-card">
 
           <h2>
             Notifications
@@ -441,16 +549,15 @@ function Caregiver() {
               (notification) => (
 
                 <div
-                  key={notification.id}
-                  style={{
-                    padding: "15px",
-                    borderBottom:
-                      "1px solid #eee",
-                    opacity:
-                      notification.is_read
-                        ? 0.6
-                        : 1,
-                  }}
+                  className={
+                    `notification-row ${notification.is_read
+                      ? "read"
+                      : ""
+                    }`
+                  }
+                  key={
+                    notification.id
+                  }
                 >
 
                   <p>
@@ -487,10 +594,9 @@ function Caregiver() {
 
         </section>
 
-      </div>
+      </main>
 
     </div>
-
   );
 }
 

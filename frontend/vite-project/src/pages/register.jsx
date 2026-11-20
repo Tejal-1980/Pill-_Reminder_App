@@ -28,49 +28,58 @@ function Register() {
   const [error, setError] =
     useState("");
 
-
-  const handleRegister = async (event) => {
-
-    event.preventDefault();
-
-    setError("");
+  const [loading, setLoading] =
+    useState(false);
 
 
-    try {
+  const handleRegister =
+    async (event) => {
 
-      await axios.post(
-        `${API}/accounts/register/`,
-        {
-          username,
-          email,
-          password,
-          role,
-        }
-      );
+      event.preventDefault();
+
+      setError("");
+      setLoading(true);
 
 
-      alert(
-        "Registration successful."
-      );
+      try {
 
-      navigate("/");
+        await axios.post(
+          `${API}/accounts/register/`,
+          {
+            username,
+            email,
+            password,
+            role,
+          }
+        );
 
-    } catch (error) {
 
-      const data =
-        error.response?.data;
+        alert(
+          "Registration successful. Please login."
+        );
 
-      setError(
-        data?.username?.[0] ||
-        data?.email?.[0] ||
-        data?.password?.[0] ||
-        data?.error ||
-        "Registration failed."
-      );
+        navigate("/");
 
-    }
+      } catch (error) {
 
-  };
+        const data =
+          error.response?.data;
+
+        setError(
+          data?.username?.[0] ||
+          data?.email?.[0] ||
+          data?.password?.[0] ||
+          data?.role?.[0] ||
+          "Registration failed."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
 
 
   return (
@@ -84,18 +93,24 @@ function Register() {
         </h1>
 
         <p>
-          Start managing your medicines.
+          Start managing your medication.
         </p>
 
 
-        <form onSubmit={handleRegister}>
+        <form
+          onSubmit={
+            handleRegister
+          }
+        >
 
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) =>
-              setUsername(e.target.value)
+              setUsername(
+                e.target.value
+              )
             }
             required
           />
@@ -106,7 +121,9 @@ function Register() {
             placeholder="Email"
             value={email}
             onChange={(e) =>
-              setEmail(e.target.value)
+              setEmail(
+                e.target.value
+              )
             }
             required
           />
@@ -117,7 +134,9 @@ function Register() {
             placeholder="Password"
             value={password}
             onChange={(e) =>
-              setPassword(e.target.value)
+              setPassword(
+                e.target.value
+              )
             }
             required
           />
@@ -126,7 +145,9 @@ function Register() {
           <select
             value={role}
             onChange={(e) =>
-              setRole(e.target.value)
+              setRole(
+                e.target.value
+              )
             }
           >
 
@@ -142,14 +163,21 @@ function Register() {
 
 
           {error && (
+
             <p className="error">
               {error}
             </p>
+
           )}
 
 
-          <button type="submit">
-            Register
+          <button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Creating..."
+              : "Register"}
           </button>
 
         </form>

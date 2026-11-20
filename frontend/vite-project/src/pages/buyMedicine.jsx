@@ -1,39 +1,47 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
 
 
-const medicines = [
+const products = [
   {
     id: 1,
     name: "Paracetamol",
     dosage: "500 mg",
-    description:
-      "Commonly used for pain and fever.",
     price: 30,
+    description:
+      "Medicine product listing.",
   },
+
   {
     id: 2,
     name: "Vitamin C",
     dosage: "500 mg",
-    description:
-      "Vitamin supplement.",
     price: 120,
+    description:
+      "Vitamin supplement listing.",
   },
+
   {
     id: 3,
     name: "Calcium",
     dosage: "500 mg",
-    description:
-      "Calcium supplement.",
     price: 180,
+    description:
+      "Calcium supplement listing.",
   },
+
   {
     id: 4,
     name: "Multivitamin",
     dosage: "Daily",
-    description:
-      "General vitamin supplement.",
     price: 250,
+    description:
+      "Multivitamin product listing.",
   },
 ];
 
@@ -42,38 +50,54 @@ function BuyMedicine() {
 
   const navigate = useNavigate();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] =
+    useState("");
 
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] =
+    useState([]);
 
 
-  const filteredMedicines =
-    medicines.filter((medicine) =>
-      medicine.name
-        .toLowerCase()
-        .includes(search.toLowerCase())
+  const filteredProducts =
+    products.filter(
+      (product) =>
+        product.name
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
     );
 
 
-  const addToCart = (medicine) => {
+  const addToCart =
+    (product) => {
 
-    setCart([
-      ...cart,
-      medicine,
-    ]);
+      setCart([
+        ...cart,
+        product,
+      ]);
 
-    alert(
-      `${medicine.name} added to cart.`
+    };
+
+
+  const removeFromCart =
+    (index) => {
+
+      setCart(
+        cart.filter(
+          (_, i) =>
+            i !== index
+        )
+      );
+
+    };
+
+
+  const total =
+    cart.reduce(
+      (sum, product) =>
+        sum + product.price,
+      0
     );
-
-  };
-
-
-  const total = cart.reduce(
-    (sum, medicine) =>
-      sum + medicine.price,
-    0
-  );
 
 
   return (
@@ -86,7 +110,7 @@ function BuyMedicine() {
       }}
     >
 
-      <div
+      <main
         style={{
           maxWidth: "1100px",
           margin: "auto",
@@ -108,7 +132,7 @@ function BuyMedicine() {
 
 
         <p>
-          Search and add medicines to your cart.
+          Search available medicine products.
         </p>
 
 
@@ -116,13 +140,20 @@ function BuyMedicine() {
           style={{
             width: "100%",
             maxWidth: "500px",
-            padding: "12px",
-            margin: "20px 0",
+            padding: "13px",
+            margin:
+              "20px 0",
+            border:
+              "1px solid #ddd",
+            borderRadius:
+              "8px",
           }}
           placeholder="Search medicine..."
           value={search}
           onChange={(e) =>
-            setSearch(e.target.value)
+            setSearch(
+              e.target.value
+            )
           }
         />
 
@@ -136,44 +167,49 @@ function BuyMedicine() {
           }}
         >
 
-          {filteredMedicines.map(
-            (medicine) => (
+          {filteredProducts.map(
+            (product) => (
 
               <div
-                key={medicine.id}
+                key={product.id}
                 style={{
                   background: "white",
                   padding: "20px",
                   borderRadius: "15px",
+                  boxShadow:
+                    "0 4px 15px rgba(0,0,0,.05)",
                 }}
               >
 
                 <h2>
-                  {medicine.name}
+                  {product.name}
                 </h2>
 
                 <p>
-                  {medicine.dosage}
+                  {product.dosage}
                 </p>
 
                 <p>
-                  {medicine.description}
+                  {product.description}
                 </p>
 
                 <strong>
-                  ₹{medicine.price}
+                  ₹{product.price}
                 </strong>
 
 
                 <br />
 
+
                 <button
-                  onClick={() =>
-                    addToCart(medicine)
-                  }
                   style={{
                     marginTop: "15px",
                   }}
+                  onClick={() =>
+                    addToCart(
+                      product
+                    )
+                  }
                 >
                   Add to Cart
                 </button>
@@ -189,9 +225,9 @@ function BuyMedicine() {
         <section
           style={{
             background: "white",
+            marginTop: "30px",
             padding: "25px",
             borderRadius: "15px",
-            marginTop: "30px",
           }}
         >
 
@@ -203,7 +239,7 @@ function BuyMedicine() {
           {cart.length === 0 ? (
 
             <p>
-              Your cart is empty.
+              Cart is empty.
             </p>
 
           ) : (
@@ -211,12 +247,41 @@ function BuyMedicine() {
             <>
 
               {cart.map(
-                (medicine, index) => (
+                (
+                  product,
+                  index
+                ) => (
 
-                  <p key={index}>
-                    {medicine.name} —
-                    ₹{medicine.price}
-                  </p>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      padding:
+                        "10px 0",
+                    }}
+                  >
+
+                    <span>
+                      {product.name}
+                    </span>
+
+                    <span>
+                      ₹{product.price}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        removeFromCart(
+                          index
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+
+                  </div>
 
                 )
               )}
@@ -233,7 +298,7 @@ function BuyMedicine() {
               <button
                 onClick={() =>
                   alert(
-                    "Demo checkout. Payment integration can be added later."
+                    "Demo checkout. Real pharmacy/payment integration can be connected later."
                   )
                 }
               >
@@ -246,10 +311,9 @@ function BuyMedicine() {
 
         </section>
 
-      </div>
+      </main>
 
     </div>
-
   );
 }
 

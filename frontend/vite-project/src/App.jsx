@@ -15,6 +15,7 @@ import BuyMedicine from "./pages/buyMedicine";
 function App() {
 
   return (
+
     <BrowserRouter>
 
       <Routes>
@@ -52,6 +53,7 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+
   );
 }
 

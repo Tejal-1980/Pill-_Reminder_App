@@ -1,0 +1,61 @@
+.caregiver-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  color: #172033;
+}
+
+.caregiver-card {
+  background: white;
+  padding: 25px;
+  margin-top: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.caregiver-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.caregiver-form input {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.connection-row,
+.patient-row,
+.dose-row,
+.notification-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.connection-row button,
+.patient-row button,
+.notification-row button {
+  margin-left: 8px;
+}
+
+.notification-row.read {
+  opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+
+  .connection-row,
+  .patient-row,
+  .dose-row,
+  .notification-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}

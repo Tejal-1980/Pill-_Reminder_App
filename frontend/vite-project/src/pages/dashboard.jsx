@@ -18,13 +18,16 @@ function Dashboard() {
 
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
-  const [time, setTime] = useState("");
-  const [instructions, setInstructions] = useState("");
+  const [instructions, setInstructions] =
+    useState("");
+
+  const [times, setTimes] = useState([""]);
 
   const [editingMedicine, setEditingMedicine] =
     useState(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
 
   const config = {
@@ -62,7 +65,6 @@ function Dashboard() {
       console.error(error);
 
     }
-
   };
 
 
@@ -70,9 +72,48 @@ function Dashboard() {
 
     setName("");
     setDosage("");
-    setTime("");
     setInstructions("");
+    setTimes([""]);
     setEditingMedicine(null);
+
+  };
+
+
+  const addTime = () => {
+
+    setTimes([
+      ...times,
+      "",
+    ]);
+
+  };
+
+
+  const removeTime = (index) => {
+
+    if (times.length === 1) {
+      return;
+    }
+
+    setTimes(
+      times.filter(
+        (_, i) => i !== index
+      )
+    );
+
+  };
+
+
+  const updateTime = (
+    index,
+    value
+  ) => {
+
+    const updated = [...times];
+
+    updated[index] = value;
+
+    setTimes(updated);
 
   };
 
@@ -81,10 +122,36 @@ function Dashboard() {
 
     event.preventDefault();
 
-    if (!name || !dosage || !time) {
+
+    const validTimes = times.filter(
+      (time) => time
+    );
+
+
+    if (!name.trim()) {
 
       alert(
-        "Please enter medicine name, dosage and time."
+        "Enter medicine name."
+      );
+
+      return;
+    }
+
+
+    if (!dosage.trim()) {
+
+      alert(
+        "Enter dosage."
+      );
+
+      return;
+    }
+
+
+    if (validTimes.length === 0) {
+
+      alert(
+        "Add at least one medicine time."
       );
 
       return;
@@ -93,14 +160,18 @@ function Dashboard() {
 
     setLoading(true);
 
+
     try {
 
       const medicineData = {
-        name,
-        dosage,
+        name: name.trim(),
+        dosage: dosage.trim(),
         start_date:
-          new Date().toISOString().split("T")[0],
-        instructions,
+          new Date()
+            .toISOString()
+            .split("T")[0],
+        instructions:
+          instructions.trim(),
         is_active: true,
       };
 
@@ -110,55 +181,27 @@ function Dashboard() {
 
       if (editingMedicine) {
 
-        const response = await axios.put(
-          `${API}/medicines/${editingMedicine.id}/`,
-          medicineData,
-          config
-        );
-
-        medicine = response.data;
-
-      } else {
-
-        const response = await axios.post(
-          `${API}/medicines/`,
-          medicineData,
-          config
-        );
-
-        medicine = response.data;
-
-      }
-
-
-      if (editingMedicine) {
-
-        const schedule =
-          editingMedicine.schedules?.[0];
-
-        if (schedule) {
-
+        const response =
           await axios.put(
-            `${API}/schedules/${schedule.id}/`,
-            {
-              medicine: medicine.id,
-              time,
-              frequency: "daily",
-              is_active: true,
-            },
+            `${API}/medicines/${editingMedicine.id}/`,
+            medicineData,
             config
           );
 
-        } else {
+        medicine =
+          response.data;
 
-          await axios.post(
-            `${API}/schedules/`,
-            {
-              medicine: medicine.id,
-              time,
-              frequency: "daily",
-              is_active: true,
-            },
+
+        // Delete old schedules.
+        const oldSchedules =
+          editingMedicine.schedules || [];
+
+        for (
+          const schedule of oldSchedules
+        ) {
+
+          await axios.delete(
+            `${API}/schedules/${schedule.id}/`,
             config
           );
 
@@ -166,11 +209,29 @@ function Dashboard() {
 
       } else {
 
+        const response =
+          await axios.post(
+            `${API}/medicines/`,
+            medicineData,
+            config
+          );
+
+        medicine =
+          response.data;
+
+      }
+
+
+      // Create all schedules.
+      for (
+        const medicineTime of validTimes
+      ) {
+
         await axios.post(
           `${API}/schedules/`,
           {
             medicine: medicine.id,
-            time,
+            time: medicineTime,
             frequency: "daily",
             is_active: true,
           },
@@ -189,6 +250,7 @@ function Dashboard() {
       console.error(error);
 
       alert(
+        error.response?.data?.detail ||
         "Unable to save medicine."
       );
 
@@ -201,13 +263,59 @@ function Dashboard() {
   };
 
 
-  const deleteMedicine = async (id) => {
+  const editMedicine = (medicine) => {
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this medicine?"
+    setEditingMedicine(
+      medicine
     );
 
-    if (!confirmed) return;
+    setName(
+      medicine.name
+    );
+
+    setDosage(
+      medicine.dosage
+    );
+
+    setInstructions(
+      medicine.instructions || ""
+    );
+
+
+    const medicineTimes =
+      medicine.schedules?.map(
+        (schedule) =>
+          schedule.time.slice(0, 5)
+      );
+
+
+    setTimes(
+      medicineTimes?.length
+        ? medicineTimes
+        : [""]
+    );
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+  };
+
+
+  const deleteMedicine = async (
+    id
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        "Delete this medicine?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
 
 
     try {
@@ -232,74 +340,37 @@ function Dashboard() {
   };
 
 
-  const editMedicine = (medicine) => {
-
-    setEditingMedicine(medicine);
-
-    setName(medicine.name);
-    setDosage(medicine.dosage);
-    setInstructions(
-      medicine.instructions || ""
-    );
-
-    setTime(
-      medicine.schedules?.[0]?.time?.slice(0, 5) || ""
-    );
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
-  };
-
-
-  const takeDose = async (doseId) => {
-
-    try {
-
-      await axios.post(
-        `${API}/doses/${doseId}/take/`,
-        {},
-        config
-      );
-
-      alert("Medicine marked as taken.");
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "Unable to update dose."
-      );
-
-    }
-
-  };
-
-
   const logout = () => {
 
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+    localStorage.removeItem(
+      "access"
+    );
+
+    localStorage.removeItem(
+      "refresh"
+    );
 
     navigate("/");
 
   };
 
 
-  const total = medicines.length;
+  const total =
+    medicines.length;
 
-  const active = medicines.filter(
-    (medicine) => medicine.is_active
-  ).length;
+  const active =
+    medicines.filter(
+      (medicine) =>
+        medicine.is_active
+    ).length;
 
-  const schedules = medicines.reduce(
-    (total, medicine) =>
-      total + (medicine.schedules?.length || 0),
-    0
-  );
+  const schedules =
+    medicines.reduce(
+      (total, medicine) =>
+        total +
+        (medicine.schedules?.length || 0),
+      0
+    );
 
 
   return (
@@ -309,8 +380,15 @@ function Dashboard() {
       <header className="dashboard-header">
 
         <div>
-          <h1>💊 Pill Reminder</h1>
-          <p>Smart Medication Management</p>
+
+          <h1>
+            💊 Pill Reminder
+          </h1>
+
+          <p>
+            Smart Medication Management
+          </p>
+
         </div>
 
 
@@ -358,18 +436,41 @@ function Dashboard() {
         <section className="stats-grid">
 
           <div className="stat-card">
-            <h3>Total Medicines</h3>
-            <strong>{total}</strong>
+
+            <h3>
+              Total Medicines
+            </h3>
+
+            <strong>
+              {total}
+            </strong>
+
           </div>
 
-          <div className="stat-card">
-            <h3>Active Medicines</h3>
-            <strong>{active}</strong>
-          </div>
 
           <div className="stat-card">
-            <h3>Schedules</h3>
-            <strong>{schedules}</strong>
+
+            <h3>
+              Active Medicines
+            </h3>
+
+            <strong>
+              {active}
+            </strong>
+
+          </div>
+
+
+          <div className="stat-card">
+
+            <h3>
+              Daily Schedules
+            </h3>
+
+            <strong>
+              {schedules}
+            </strong>
+
           </div>
 
         </section>
@@ -409,23 +510,71 @@ function Dashboard() {
             />
 
 
-            <input
-              type="time"
-              value={time}
-              onChange={(e) =>
-                setTime(e.target.value)
-              }
-            />
-
-
-            <input
-              type="text"
+            <textarea
               placeholder="Instructions"
               value={instructions}
               onChange={(e) =>
-                setInstructions(e.target.value)
+                setInstructions(
+                  e.target.value
+                )
               }
             />
+
+
+            <div className="schedule-inputs">
+
+              <h3>
+                Medicine Times
+              </h3>
+
+
+              {times.map(
+                (time, index) => (
+
+                  <div
+                    className="time-row"
+                    key={index}
+                  >
+
+                    <input
+                      type="time"
+                      value={time}
+                      onChange={(e) =>
+                        updateTime(
+                          index,
+                          e.target.value
+                        )
+                      }
+                    />
+
+
+                    {times.length > 1 && (
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeTime(index)
+                        }
+                      >
+                        Remove
+                      </button>
+
+                    )}
+
+                  </div>
+
+                )
+              )}
+
+
+              <button
+                type="button"
+                onClick={addTime}
+              >
+                + Add Another Time
+              </button>
+
+            </div>
 
 
             <button
@@ -458,14 +607,18 @@ function Dashboard() {
 
         <section className="medicine-section">
 
-          <h2>Your Medicines</h2>
+          <h2>
+            Your Medicines
+          </h2>
 
 
           {medicines.length === 0 ? (
 
             <div className="empty-state">
 
-              <h3>No medicines yet</h3>
+              <h3>
+                No medicines yet
+              </h3>
 
               <p>
                 Add your first medicine above.
@@ -477,100 +630,117 @@ function Dashboard() {
 
             <div className="medicine-grid">
 
-              {medicines.map((medicine) => (
+              {medicines.map(
+                (medicine) => (
 
-                <article
-                  className="medicine-card"
-                  key={medicine.id}
-                >
+                  <article
+                    className="medicine-card"
+                    key={medicine.id}
+                  >
 
-                  <div className="medicine-card-header">
+                    <div className="medicine-card-header">
 
-                    <div>
+                      <div>
 
-                      <h3>
-                        {medicine.name}
-                      </h3>
+                        <h3>
+                          {medicine.name}
+                        </h3>
 
-                      <p>
-                        {medicine.dosage}
-                      </p>
+                        <p>
+                          {medicine.dosage}
+                        </p>
+
+                      </div>
+
+
+                      <span
+                        className={
+                          medicine.is_active
+                            ? "active-badge"
+                            : "inactive-badge"
+                        }
+                      >
+                        {medicine.is_active
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
 
                     </div>
 
 
-                    <span
-                      className={
-                        medicine.is_active
-                          ? "active-badge"
-                          : "inactive-badge"
-                      }
-                    >
-                      {medicine.is_active
-                        ? "Active"
-                        : "Inactive"}
-                    </span>
+                    <div className="medicine-info">
 
-                  </div>
+                      <strong>
+                        Schedule
+                      </strong>
 
 
-                  <div className="medicine-info">
+                      {medicine.schedules?.map(
+                        (schedule) => (
 
-                    <strong>
-                      Schedule
-                    </strong>
+                          <p
+                            key={
+                              schedule.id
+                            }
+                          >
+                            ⏰{" "}
+                            {schedule.time.slice(
+                              0,
+                              5
+                            )}
+                          </p>
 
-                    {medicine.schedules?.map(
-                      (schedule) => (
+                        )
+                      )}
 
-                        <p key={schedule.id}>
-                          ⏰{" "}
-                          {schedule.time.slice(0, 5)}
-                        </p>
+                    </div>
 
-                      )
+
+                    {medicine.instructions && (
+
+                      <p className="instructions">
+
+                        <strong>
+                          Instructions:
+                        </strong>{" "}
+
+                        {medicine.instructions}
+
+                      </p>
+
                     )}
 
-                  </div>
+
+                    <div className="medicine-actions">
+
+                      <button
+                        onClick={() =>
+                          editMedicine(
+                            medicine
+                          )
+                        }
+                      >
+                        Edit
+                      </button>
 
 
-                  {medicine.instructions && (
+                      <button
+                        className="delete-button"
+                        onClick={() =>
+                          deleteMedicine(
+                            medicine.id
+                          )
+                        }
+                      >
+                        Delete
+                      </button>
 
-                    <p className="instructions">
-                      <strong>
-                        Instructions:
-                      </strong>{" "}
-                      {medicine.instructions}
-                    </p>
+                    </div>
 
-                  )}
+                  </article>
 
-
-                  <div className="medicine-actions">
-
-                    <button
-                      onClick={() =>
-                        editMedicine(medicine)
-                      }
-                    >
-                      Edit
-                    </button>
-
-
-                    <button
-                      className="delete-button"
-                      onClick={() =>
-                        deleteMedicine(medicine.id)
-                      }
-                    >
-                      Delete
-                    </button>
-
-                  </div>
-
-                </article>
-
-              ))}
+                )
+              )}
 
             </div>
 
@@ -581,7 +751,6 @@ function Dashboard() {
       </main>
 
     </div>
-
   );
 }
 
