@@ -1,43 +1,27 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import axios from "axios";
-
 import { useNavigate } from "react-router-dom";
 
 import "./history.css";
 
 
-const API =
-  "http://127.0.0.1:8000/api";
+const API = "http://127.0.0.1:8000/api";
 
 
 function History() {
 
   const navigate = useNavigate();
 
-  const token =
-    localStorage.getItem(
-      "access"
-    );
+  const token = localStorage.getItem("access");
 
+  const [doses, setDoses] = useState([]);
 
-  const [doses, setDoses] =
-    useState([]);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(true);
+  const [search, setSearch] = useState("");
 
 
   const config = {
     headers: {
-      Authorization:
-        `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   };
 
@@ -45,9 +29,7 @@ function History() {
   useEffect(() => {
 
     if (!token) {
-
       navigate("/");
-
       return;
     }
 
@@ -60,34 +42,23 @@ function History() {
 
     try {
 
-      setLoading(true);
-
-      const response =
-        await axios.get(
-          `${API}/doses/`,
-          config
-        );
-
-      setDoses(
-        response.data
+      const response = await axios.get(
+        `${API}/doses/`,
+        config
       );
+
+      setDoses(response.data);
 
     } catch (error) {
 
       console.error(error);
-
-    } finally {
-
-      setLoading(false);
 
     }
 
   };
 
 
-  const takeDose = async (
-    id
-  ) => {
+  const takeDose = async (id) => {
 
     try {
 
@@ -97,12 +68,14 @@ function History() {
         config
       );
 
-      await fetchDoses();
+      fetchDoses();
 
     } catch (error) {
 
+      console.error(error);
+
       alert(
-        "Unable to mark dose as taken."
+        "Unable to mark medicine as taken."
       );
 
     }
@@ -110,9 +83,7 @@ function History() {
   };
 
 
-  const skipDose = async (
-    id
-  ) => {
+  const skipDose = async (id) => {
 
     try {
 
@@ -122,12 +93,14 @@ function History() {
         config
       );
 
-      await fetchDoses();
+      fetchDoses();
 
     } catch (error) {
 
+      console.error(error);
+
       alert(
-        "Unable to skip dose."
+        "Unable to skip medicine."
       );
 
     }
@@ -135,44 +108,27 @@ function History() {
   };
 
 
-  const filteredDoses =
-    doses.filter(
-      (dose) =>
-        dose.medicine_name
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
-    );
+  const filteredDoses = doses.filter(
+    (dose) =>
+      dose.medicine_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+  );
 
 
-  const total =
-    doses.length;
+  const total = doses.length;
 
-  const taken =
-    doses.filter(
-      (dose) =>
-        dose.status === "taken"
-    ).length;
+  const taken = doses.filter(
+    (dose) => dose.status === "taken"
+  ).length;
 
-  const missed =
-    doses.filter(
-      (dose) =>
-        dose.status === "missed"
-    ).length;
-
-  const pending =
-    doses.filter(
-      (dose) =>
-        dose.status === "pending"
-    ).length;
-
+  const pending = doses.filter(
+    (dose) => dose.status === "pending"
+  ).length;
 
   const adherence =
     total > 0
-      ? Math.round(
-        (taken / total) * 100
-      )
+      ? Math.round((taken / total) * 100)
       : 0;
 
 
@@ -183,17 +139,9 @@ function History() {
       <header className="history-header">
 
         <div>
-
-          <h1>
-            Medicine History
-          </h1>
-
-          <p>
-            Track your medication activity
-          </p>
-
+          <h1>Medicine History</h1>
+          <p>Track your medication activity</p>
         </div>
-
 
         <button
           onClick={() =>
@@ -212,67 +160,23 @@ function History() {
         <div className="history-stats">
 
           <div>
-
-            <span>
-              Total
-            </span>
-
-            <strong>
-              {total}
-            </strong>
-
+            <span>Total</span>
+            <strong>{total}</strong>
           </div>
 
-
           <div>
-
-            <span>
-              Taken
-            </span>
-
-            <strong>
-              {taken}
-            </strong>
-
+            <span>Taken</span>
+            <strong>{taken}</strong>
           </div>
 
-
           <div>
-
-            <span>
-              Missed
-            </span>
-
-            <strong>
-              {missed}
-            </strong>
-
+            <span>Pending</span>
+            <strong>{pending}</strong>
           </div>
 
-
           <div>
-
-            <span>
-              Pending
-            </span>
-
-            <strong>
-              {pending}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <span>
-              Adherence
-            </span>
-
-            <strong>
-              {adherence}%
-            </strong>
-
+            <span>Adherence</span>
+            <strong>{adherence}%</strong>
           </div>
 
         </div>
@@ -284,126 +188,99 @@ function History() {
           placeholder="Search medicine..."
           value={search}
           onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
+            setSearch(e.target.value)
           }
         />
 
 
-        {loading ? (
+        <div className="dose-list">
 
-          <p>
-            Loading medicine history...
-          </p>
+          {filteredDoses.length === 0 ? (
 
-        ) : (
+            <div className="empty-history">
 
-          <div className="dose-list">
+              <h3>No dose records</h3>
 
-            {filteredDoses.length === 0 ? (
+              <p>
+                Your medication records will appear here.
+              </p>
 
-              <div className="empty-history">
+            </div>
 
-                <h3>
-                  No dose records
-                </h3>
+          ) : (
 
-                <p>
-                  Today's doses will
-                  appear here automatically.
-                </p>
+            filteredDoses.map((dose) => (
+
+              <div
+                className="dose-item"
+                key={dose.id}
+              >
+
+                <div>
+
+                  <h3>
+                    {dose.medicine_name}
+                  </h3>
+
+                  <p>
+                    Dosage: {dose.dosage}
+                  </p>
+
+                  <p>
+                    Scheduled:{" "}
+                    {new Date(
+                      dose.scheduled_at
+                    ).toLocaleString()}
+                  </p>
+
+                </div>
+
+
+                <div className="dose-actions">
+
+                  <span
+                    className={`status-badge ${dose.status}`}
+                  >
+                    {dose.status}
+                  </span>
+
+
+                  {dose.status === "pending" && (
+
+                    <>
+                      <button
+                        onClick={() =>
+                          takeDose(dose.id)
+                        }
+                      >
+                        Take
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          skipDose(dose.id)
+                        }
+                      >
+                        Skip
+                      </button>
+                    </>
+
+                  )}
+
+                </div>
 
               </div>
 
-            ) : (
+            ))
 
-              filteredDoses.map(
-                (dose) => (
+          )}
 
-                  <div
-                    className="dose-item"
-                    key={dose.id}
-                  >
-
-                    <div>
-
-                      <h3>
-                        {dose.medicine_name}
-                      </h3>
-
-                      <p>
-                        Dosage:{" "}
-                        {dose.dosage}
-                      </p>
-
-                      <p>
-                        Scheduled:{" "}
-                        {new Date(
-                          dose.scheduled_at
-                        ).toLocaleString()}
-                      </p>
-
-                    </div>
-
-
-                    <div className="dose-actions">
-
-                      <span
-                        className={
-                          `status-badge ${dose.status}`
-                        }
-                      >
-                        {dose.status}
-                      </span>
-
-
-                      {dose.status ===
-                        "pending" && (
-
-                          <>
-
-                            <button
-                              onClick={() =>
-                                takeDose(
-                                  dose.id
-                                )
-                              }
-                            >
-                              Take
-                            </button>
-
-
-                            <button
-                              onClick={() =>
-                                skipDose(
-                                  dose.id
-                                )
-                              }
-                            >
-                              Skip
-                            </button>
-
-                          </>
-
-                        )}
-
-                    </div>
-
-                  </div>
-
-                )
-              )
-
-            )}
-
-          </div>
-
-        )}
+        </div>
 
       </main>
 
     </div>
+
   );
 }
 
